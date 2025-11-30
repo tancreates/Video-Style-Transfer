@@ -137,7 +137,7 @@ with st.sidebar:
     st.markdown("## 🎨 Configuration")
     
     # File upload
-    st.markdown("### Upload Media")
+    st.markdown("### 📁 Upload Media")
     
     # File type selector
     input_type = st.radio(
@@ -186,62 +186,30 @@ with st.sidebar:
         st.error("No director palettes found! Run `python generate_stats_only.py` first.")
         st.stop()
     
-    use_custom_reference = st.checkbox(" Use custom reference style", value=False)
+    selected_director = st.selectbox(
+        "Select director style",
+        available_directors,
+        format_func=lambda x: f"{x}",
+        help="Choose a director's cinematic color grading style"
+    )
     
-    if use_custom_reference:
-        st.markdown("##### Upload Reference")
-        
-        ref_type = st.radio(
-            "Reference type",
-            ["Image", "Video"],
-            horizontal=True,
-            key="ref_type",
-            label_visibility="collapsed"
-        )
-        
-        if ref_type == "Image":
-            ref_types = ['jpg', 'jpeg', 'png', 'bmp', 'webp']
-        else:
-            ref_types = ['mp4', 'avi', 'mov', 'mkv', 'webm']
-        
-        reference_file = st.file_uploader(
-            "Upload reference for style extraction",
-            type=ref_types,
-            help="Upload a reference image or video to extract color style from",
-            key="ref_upload"
-        )
-        
-        if reference_file:
-            ref_size_mb = reference_file.size / (1024 * 1024)
-            st.success(f"Reference: {reference_file.name} ({ref_size_mb:.1f} MB)")
-        
-        selected_director = None
-    else:
-        selected_director = st.selectbox(
-            "Select director style",
-            available_directors,
-            format_func=lambda x: f"{x}",
-            help="Choose a director's cinematic color grading style"
-        )
-        reference_file = None
-        
-        # Quick preview of selected director
-        if selected_director:
-            directors_info = load_director_info()
-            if selected_director in directors_info:
-                info = directors_info[selected_director]
-                with st.expander(f" About {selected_director}", expanded=False):
-                    st.write(f"**Style:** {info['style']}")
-                    st.write(f"**Description:** {info['description']}")
-                    palette_html = "".join([
-                        f'<div style="display:inline-block; width:40px; height:40px; background-color:{c}; margin:4px; border-radius:8px; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"></div>' 
-                        for c in info['colors']
-                    ])
-                    st.markdown("**Color Palette:**", unsafe_allow_html=True)
-                    st.markdown(palette_html, unsafe_allow_html=True)
-    
+    # Quick preview of selected director
+    if selected_director:
+        directors_info = load_director_info()
+        if selected_director in directors_info:
+            info = directors_info[selected_director]
+            with st.expander(f"ℹ️ About {selected_director}", expanded=False):
+                st.write(f"**Style:** {info['style']}")
+                st.write(f"**Description:** {info['description']}")
+                palette_html = "".join([
+                    f'<div style="display:inline-block; width:40px; height:40px; background-color:{c}; margin:4px; border-radius:8px; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"></div>' 
+                    for c in info['colors']
+                ])
+                st.markdown("**Color Palette:**", unsafe_allow_html=True)
+                st.markdown(palette_html, unsafe_allow_html=True)
+
     # Transfer method
-    st.markdown("###  Transfer Method")
+    st.markdown("### 🎨 Transfer Method")
     transfer_method = st.selectbox(
         "Method",
         ['reinhard', 'chroma_only', 'multiscale', 'bilateral', 'detail_preserve', 
@@ -272,7 +240,7 @@ with st.sidebar:
     )
     
     # Strength slider
-    st.markdown("###  Transfer Strength")
+    st.markdown("### 💪 Transfer Strength")
     strength = st.slider(
         "Strength",
         min_value=0.0,
@@ -324,7 +292,7 @@ with st.sidebar:
 col1, col2 = st.columns([1, 1])
 
 with col1:
-    st.markdown("###  Input Preview")
+    st.markdown("### 📤 Input Preview")
     if uploaded_file is not None:
         file_type = uploaded_file.type.split('/')[0]
         
@@ -382,15 +350,15 @@ with col1:
     else:
         st.markdown("""
         <div class="upload-section">
-            <h3> Upload a file to get started</h3>
+            <h3>👆 Upload a file to get started</h3>
             <p style="margin-top: 1rem;">📸 <strong>Images:</strong> JPG, PNG, BMP, WEBP</p>
-            <p> <strong>Videos:</strong> MP4, AVI, MOV, MKV, WebM, FLV</p>
+            <p>🎬 <strong>Videos:</strong> MP4, AVI, MOV, MKV, WebM, FLV</p>
             <p style="margin-top: 1rem; color: #888;">Maximum size: 2GB</p>
         </div>
         """, unsafe_allow_html=True)
 
 with col2:
-    st.markdown("###  Output Preview")
+    st.markdown("### 📥 Output Preview")
     if st.session_state.processed_file:
         if st.session_state.processed_file.endswith(('.jpg', '.png')):
             output_image = Image.open(st.session_state.processed_file)
@@ -398,7 +366,7 @@ with col2:
             
             # Image comparison
             if uploaded_file and uploaded_file.type.split('/')[0] == 'image':
-                with st.expander(" Before/After Comparison"):
+                with st.expander("🔍 Before/After Comparison"):
                     comp_col1, comp_col2 = st.columns(2)
                     with comp_col1:
                         original_img = Image.open(uploaded_file)
@@ -412,7 +380,7 @@ with col2:
                 st.download_button(
                     label="Download Processed Image",
                     data=f,
-                    file_name=f"styled_{selected_director if selected_director else 'custom'}.{file_ext}",
+                    file_name=f"styled_{selected_director}.{file_ext}",
                     mime=f"image/{file_ext}"
                 )
         else:
@@ -428,7 +396,7 @@ with col2:
                     st.download_button(
                         label="Download Processed Video",
                         data=f,
-                        file_name=f"styled_{selected_director if selected_director else 'custom'}.mp4",
+                        file_name=f"styled_{selected_director}.mp4",
                         mime="video/mp4"
                     )
                 
@@ -436,7 +404,7 @@ with col2:
     else:
         st.markdown("""
         <div class="upload-section">
-            <h3> Waiting for processing</h3>
+            <h3>⏳ Waiting for processing</h3>
             <p style="margin-top: 1rem;">1️⃣ Upload your media</p>
             <p>2️⃣ Select a director style</p>
             <p>3️⃣ Adjust settings</p>
@@ -446,9 +414,9 @@ with col2:
         """, unsafe_allow_html=True)
 
 # Director info display
-if selected_director and not use_custom_reference:
+if selected_director:
     st.markdown("---")
-    st.markdown("###  Selected Director Style")
+    st.markdown("### 🎬 Selected Director Style")
     
     directors_info = load_director_info()
     if selected_director in directors_info:
@@ -492,20 +460,12 @@ if process_button and uploaded_file is not None:
         with open(input_path, 'wb') as f:
             f.write(uploaded_file.read())
         
-        # Handle reference file if provided
+        # Set reference path to None, as it's no longer used
         reference_path = None
-        if use_custom_reference and reference_file:
-            ref_ext = reference_file.name.split('.')[-1]
-            reference_path = os.path.join(temp_dir, f"reference.{ref_ext}")
-            with open(reference_path, 'wb') as f:
-                f.write(reference_file.read())
         
         # Initialize pipeline
         with st.spinner("Initializing pipeline..."):
-            if reference_path:
-                pipeline = DirectorStyleTransfer(reference_path=reference_path)
-            else:
-                pipeline = DirectorStyleTransfer(director_name=selected_director)
+            pipeline = DirectorStyleTransfer(director_name=selected_director)
         
         # Process
         if file_type == 'image':
@@ -568,7 +528,7 @@ import sys
 sys.path.insert(0, r'{os.getcwd()}')
 from final_pipeline import DirectorStyleTransfer
 
-pipeline = DirectorStyleTransfer({"reference_path='" + reference_path + "'" if reference_path else "director_name='" + selected_director + "'"})
+pipeline = DirectorStyleTransfer(director_name='{selected_director}')
 pipeline.process_video(
     r'{input_path}',
     r'{output_path}',
@@ -632,9 +592,9 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Show examples
-with st.expander(" Examples & Tips"):
+with st.expander("📚 Examples & Tips"):
     st.markdown("""
-    ###  Tips for Best Results
+    ### 💡 Tips for Best Results
     
     **For Highly Saturated Styles (Barbie, Tarantino):**
     - Use strength 0.5-0.7
@@ -659,9 +619,9 @@ with st.expander(" Examples & Tips"):
     """)
 
 # Statistics display
-if st.sidebar.checkbox(" Show Processing Stats", value=False):
+if st.sidebar.checkbox("📊 Show Processing Stats", value=False):
     st.markdown("---")
-    st.markdown("###  System Information")
+    st.markdown("### 📊 System Information")
     
     col1, col2, col3 = st.columns(3)
     
