@@ -1,0 +1,13 @@
+{
+  "director": "MartinScorcesse",
+  "n_frames": 500,
+  "mean_l": -1.9169104828238488,
+  "mean_alpha": 0.10205159750708845,
+  "mean_beta": 0.017468936779744582,
+  "std_l": 0.9358210693597794,
+  "std_alpha": 0.11576793246343732,
+  "std_beta": 0.024363780132494867,
+  "cross_frame_var_l": 0.9124768799381915,
+  "cross_frame_var_alpha": 0.006780194184335483,
+  "cross_frame_var_beta": 0.0004822466588465075
+}

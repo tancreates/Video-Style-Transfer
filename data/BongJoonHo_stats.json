@@ -1,0 +1,13 @@
+{
+  "director": "BongJoonHo",
+  "n_frames": 500,
+  "mean_l": -1.842862040579319,
+  "mean_alpha": 0.10684890088322573,
+  "mean_beta": 0.009247902868170059,
+  "std_l": 0.6647417570352554,
+  "std_alpha": 0.14246482191607357,
+  "std_beta": 0.0244389082537964,
+  "cross_frame_var_l": 0.2551717036286845,
+  "cross_frame_var_alpha": 0.01644856133430779,
+  "cross_frame_var_beta": 0.00039403398196087016
+}

@@ -1,0 +1,13 @@
+{
+  "director": "QuentinTarentino",
+  "n_frames": 500,
+  "mean_l": -1.7358941919803619,
+  "mean_alpha": 0.11488262641688925,
+  "mean_beta": 0.02974213132670411,
+  "std_l": 0.6983510300815106,
+  "std_alpha": 0.11971994095353876,
+  "std_beta": 0.02444334917334345,
+  "cross_frame_var_l": 0.6902726336504891,
+  "cross_frame_var_alpha": 0.007293682543439967,
+  "cross_frame_var_beta": 0.00040319339879515845
+}

@@ -1,0 +1,13 @@
+{
+  "director": "Oppenheimer",
+  "n_frames": 500,
+  "mean_l": -3.710585618302226,
+  "mean_alpha": 0.058920146149466744,
+  "mean_beta": -0.004292321735236328,
+  "std_l": 4.880926370114088,
+  "std_alpha": 0.09442630574386567,
+  "std_beta": 0.018804248039145023,
+  "cross_frame_var_l": 1.381663820271378,
+  "cross_frame_var_alpha": 0.0047273399191797485,
+  "cross_frame_var_beta": 8.866699504648188e-05
+}

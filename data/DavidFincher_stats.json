@@ -1,0 +1,13 @@
+{
+  "director": "DavidFincher",
+  "n_frames": 500,
+  "mean_l": -3.4857044010162355,
+  "mean_alpha": 0.1049021851894213,
+  "mean_beta": 0.001994689729082893,
+  "std_l": 2.895140622884035,
+  "std_alpha": 0.16301502524261013,
+  "std_beta": 0.026874915438881545,
+  "cross_frame_var_l": 5.717984763708354,
+  "cross_frame_var_alpha": 0.01704713968487685,
+  "cross_frame_var_beta": 0.0002563119472365514
+}

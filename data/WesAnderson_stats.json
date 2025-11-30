@@ -1,0 +1,13 @@
+{
+  "director": "WesAnderson",
+  "n_frames": 500,
+  "mean_l": -5.7237319641113285,
+  "mean_alpha": 0.03262100856412144,
+  "mean_beta": 0.014646891907032113,
+  "std_l": 6.9054589939117434,
+  "std_alpha": 0.11085239890217781,
+  "std_beta": 0.024691302863880993,
+  "cross_frame_var_l": 0.2393181793380672,
+  "cross_frame_var_alpha": 0.005663010658225618,
+  "cross_frame_var_beta": 0.00042370783160252594
+}
