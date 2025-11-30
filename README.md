@@ -56,7 +56,7 @@ streamlit run app.py
 python final_pipeline.py -i photo.jpg -c
 ```
 
-## 📊 Transfer Methods (9 Total)
+##  Transfer Methods (9 Total)
 
 | Method | Type | Description | Speed | Best For |
 |--------|------|-------------|-------|----------|
@@ -189,7 +189,7 @@ streamlit run app.py
 
 Features:
 - 📤 Drag-and-drop file upload (images/videos)
-- 🎬 Select from 8 director styles
+- 🎬 Select from 9 director styles
 - 🎨 Choose from 9 transfer methods
 - 🎚️ Adjust strength slider (0.0-1.0)
 - 🔧 IDT iterations control (5-50)
@@ -205,7 +205,7 @@ Required:
 Optional:
   --output, -o         Output path (auto-generated if omitted)
   --director, -d       Director style (default: Avatar)
-                       Choices: Avatar, Barbie, WesAnderson, ChristopherNolan,
+                       Choices: Avatar, Barbie, Oppenheimer, WesAnderson, ChristopherNolan,
                                 DavidFincher, QuentinTarentino, BongJoonHo, MartinScorcesse
   --method, -m         Transfer method (default: reinhard)
                        Choices: reinhard, chroma_only, multiscale, bilateral,
@@ -223,6 +223,7 @@ Optional:
 |----------|-------|---------------|---------------------|
 | **Avatar** | Sci-Fi Fantasy | Blue, teal, bioluminescence | Alien world, glowing flora |
 | **Barbie** | Pop Art | Pink, purple, magenta | High saturation, playful |
+| **Oppenheimer** | Historical Drama | Orange, amber, sepia | Vintage film stock, atomic glow |
 | **Wes Anderson** | Whimsical | Pastel yellow, pink, teal | Symmetrical, vintage |
 | **Christopher Nolan** | Cool Realism | Blue-gray, steel, desaturated | Gritty, atmospheric |
 | **David Fincher** | Neo-Noir | Teal shadows, orange skin | High contrast, moody |
@@ -376,11 +377,11 @@ Test image processed at different strengths (Ruderman lαβ space):
 4. Reduced iterations (10 for video)
 
 **Impact**:
-- 🎬 Flicker-free video output
-- ⚡ 2.5× faster processing (60 min → 25 min)
-- 🎯 Automatic detection (no user configuration needed)
+-  Flicker-free video output
+-  2.5× faster processing (60 min → 25 min)
+-  Automatic detection (no user configuration needed)
 
-## 🎓 Scientific Foundation
+##  Scientific Foundation
 
 ### References
 
