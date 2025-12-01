@@ -366,7 +366,66 @@ class EnhancedColorTransfer(ColorTransfer):
         result_bgr = self.lab_to_bgr(result_lab)
         
         return result_bgr
+    def protect_highlights_lab(self, bgr_image, threshold=220):
+        """
+        Desaturates highlights to ensure whites remain white.
+        Uses CIE LAB space to isolate Luminance from Color.
+        """
+        # 1. Convert to CIE LAB (Standard OpenCV 8-bit)
+        # Note: We use standard LAB here instead of Ruderman because 
+        # thresholding (220) works predictably in standard 0-255 range.
+        lab = cv2.cvtColor(bgr_image, cv2.COLOR_BGR2LAB).astype(np.float32)
+        l_channel, a_channel, b_channel = cv2.split(lab)
+        
+        # 2. Create Desaturation Factor
+        # If L < threshold, factor = 1.0 (Keep Color)
+        # If L > threshold, factor fades to 0.0 (Remove Color)
+        # We use a soft curve for smooth transition
+        desat_factor = np.clip((255 - l_channel) / (255 - threshold + 1e-6), 0, 1)
+        
+        # Make the transition non-linear (smoother roll-off)
+        desat_factor = desat_factor ** 2
+        
+        # 3. Apply to Color Channels (a and b)
+        # In OpenCV 8-bit LAB, the neutral (grey) point is 128
+        # We shift 'a' and 'b' towards 128 based on the factor
+        a_channel = (a_channel - 128) * desat_factor + 128
+        b_channel = (b_channel - 128) * desat_factor + 128
+        
+        # 4. Merge and Convert back to BGR
+        lab_protected = cv2.merge([l_channel, a_channel, b_channel])
+        result_bgr = cv2.cvtColor(lab_protected.astype(np.uint8), cv2.COLOR_LAB2BGR)
+        
+        return result_bgr
     
+    def create_skin_mask_ycbcr(self, bgr_image):
+        """
+        Generate skin mask using YCbCr color space thresholding (DIP Method).
+        Returns a soft alpha mask (0.0 - 1.0) where 1.0 is skin.
+        """
+        # 1. Convert to YCbCr
+        ycbcr = cv2.cvtColor(bgr_image, cv2.COLOR_BGR2YCrCb)
+        
+        # 2. Define skin color bounds (Empirical values)
+        # Cb: 77-127, Cr: 133-173
+        lower = np.array([0, 133, 77], dtype=np.uint8)
+        upper = np.array([255, 173, 127], dtype=np.uint8)
+        
+        # 3. Create binary mask
+        mask = cv2.inRange(ycbcr, lower, upper)
+        
+        # 4. Clean up noise using Morphology (Open then Dilate)
+        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+        mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+        mask = cv2.dilate(mask, kernel, iterations=2)
+        
+        # 5. Blur to create soft transitions (Alpha matte)
+        mask = cv2.GaussianBlur(mask, (15, 15), 0)
+        
+        # 6. Normalize to 0-1 float and expand to 3 channels
+        mask_float = mask.astype(np.float32) / 255.0
+        return np.stack([mask_float] * 3, axis=2)
+
     def iterative_distribution_transfer(self, source_frame, target_pixels, 
                                        iterations=20, strength=1.0):
         """
