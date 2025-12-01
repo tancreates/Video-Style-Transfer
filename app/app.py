@@ -271,7 +271,17 @@ with st.sidebar:
         value=True,
         help="Reduces flickering in videos (recommended)"
     )
+    preserve_white = st.checkbox(
+        "Preserve Whites",
+        value=True,
+        help="Prevents highlights from being tinted (Highlight Roll-off)"
+    )
     
+    preserve_skin = st.checkbox(
+        "Preserve Skin Tones",
+        value=False,
+        help="Protects faces/skin from aggressive color grading (Uses AI or YCbCr)"
+    )
     # Advanced options
     with st.expander("🔧 Advanced Options"):
         max_resolution = st.selectbox(
@@ -468,6 +478,7 @@ if process_button and uploaded_file is not None:
             pipeline = DirectorStyleTransfer(director_name=selected_director)
         
         # Process
+        # Process
         if file_type == 'image':
             # Process image
             output_path = os.path.join(temp_dir, "output.jpg")
@@ -475,10 +486,19 @@ if process_button and uploaded_file is not None:
             with st.spinner("Processing image..."):
                 progress_bar = st.progress(0)
                 
-                # Read and process
-                image = cv2.imread(input_path)
+                # --- BETTER WAY TO READ IMAGE ---
+                # 1. Reset pointer
+                uploaded_file.seek(0)
+                # 2. Read bytes
+                file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
+                # 3. Decode directly from memory (Avoids path issues)
+                image = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
+                # --------------------------------
                 
-                # Prepare kwargs based on method
+                if image is None:
+                    st.error("Error decoding image. Please try a different file.")
+                    st.stop()
+
                 kwargs = {'strength': strength}
                 if transfer_method in ['idt', 'iterative_distribution']:
                     kwargs['iterations'] = idt_iterations
@@ -486,6 +506,8 @@ if process_button and uploaded_file is not None:
                 processed = pipeline.process_frame(
                     image,
                     method=transfer_method,
+                    preserve_white=preserve_white, # New parameter
+                    preserve_skin=preserve_skin,   # New parameter
                     **kwargs
                 )
                 
@@ -521,8 +543,7 @@ if process_button and uploaded_file is not None:
                 # Process video (we'll capture output in a different way)
                 import subprocess
                 import sys
-                
-                # Create a Python script to run the processing
+
                 script_content = f"""
 import sys
 sys.path.insert(0, r'{os.getcwd()}')
@@ -534,9 +555,26 @@ pipeline.process_video(
     r'{output_path}',
     method='{transfer_method}',
     temporal_smooth={temporal_smooth},
-    strength={strength}
+    strength={strength},
+    preserve_white={preserve_white},  # Passed from Streamlit
+    preserve_skin={preserve_skin}     # Passed from Streamlit
 )
-"""
+""" 
+#                 # Create a Python script to run the processing
+#                 script_content = f"""
+# import sys
+# sys.path.insert(0, r'{os.getcwd()}')
+# from final_pipeline import DirectorStyleTransfer
+
+# pipeline = DirectorStyleTransfer(director_name='{selected_director}')
+# pipeline.process_video(
+#     r'{input_path}',
+#     r'{output_path}',
+#     method='{transfer_method}',
+#     temporal_smooth={temporal_smooth},
+#     strength={strength}
+# )
+# """
                 script_path = os.path.join(temp_dir, 'process.py')
                 with open(script_path, 'w') as f:
                     f.write(script_content)
