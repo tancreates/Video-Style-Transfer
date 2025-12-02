@@ -213,7 +213,8 @@ with st.sidebar:
     transfer_method = st.selectbox(
         "Method",
         ['reinhard', 'chroma_only', 'multiscale', 'bilateral', 'detail_preserve', 
-         'progressive', 'mkl', 'idt'],
+         'progressive', 'mkl', 'idt','histogram_spec',
+          'palette_hard', 'palette_soft', 'palette_weighted'],
         format_func=lambda x: {
             'reinhard': 'Reinhard - Fast & Natural (Recommended)',
             'chroma_only': 'Chroma Only - Preserve Brightness',
@@ -222,8 +223,12 @@ with st.sidebar:
             'detail_preserve': 'Detail Preserve - Best Quality',
             'progressive': 'Progressive - Iterative Refinement',
             'mkl': 'Monge-Kantorovitch - Geometric (Advanced)',
-            'idt': 'Iterative Distribution - Optimal Transport (Advanced)'
-        }[x],
+            'idt': 'Iterative Distribution - Optimal Transport (Advanced)',
+            'histogram_spec': 'Histogram Matching - Exact Contrast Copy',
+            'palette_hard': 'Palette Hard - Quantized/Posterized',
+            'palette_soft': 'Palette Soft - Tinted Blend',
+            'palette_weighted': 'Palette Weighted - Smooth Quantization'
+        }.get(x, x),
         help="""
         Standard Methods:
         - Reinhard: Fast, natural (recommended for most)
@@ -232,6 +237,7 @@ with st.sidebar:
         - Bilateral: Edge-preserving, no halos
         - Detail Preserve: Best quality (slower)
         - Progressive: Iterative refinement
+        - Histogram Matching: Forces exact texture match (uses sample frame)
         
         Advanced Geometric Methods:
         - MKL: Matches covariance (correlated colors)
@@ -273,7 +279,7 @@ with st.sidebar:
     )
     preserve_white = st.checkbox(
         "Preserve Whites",
-        value=True,
+        value=False,
         help="Prevents highlights from being tinted (Highlight Roll-off)"
     )
     
