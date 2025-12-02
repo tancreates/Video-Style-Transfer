@@ -8,8 +8,8 @@ Transform your videos and photos with cinematic color grading from famous direct
 
 ##  Highlights
 
--  **9 Color Transfer Methods** - From statistical matching to geometric optimal transport
--  **9 Director Styles** - Avatar, Barbie, Oppenheimer Wes Anderson, Christopher Nolan, David Fincher, Quentin Tarantino, Bong Joon-ho, Martin Scorsese
+-  **5 Color Transfer Methods** - From statistical matching to geometric optimal transport
+-  **9 Director Styles** - Avatar, Barbie, Oppenheimer, Wes Anderson, Christopher Nolan, David Fincher, Quentin Tarantino, Bong Joon-ho, Martin Scorsese
 -  **Production Video Processing** - Anti-flicker temporal smoothing, auto FPS/resolution optimization
 -  **Streamlit Web App** - Easy-to-use interface with drag-and-drop
 -  **Audio Preservation** - Automatic audio handling with FFmpeg
@@ -55,20 +55,21 @@ streamlit run app.py
 python final_pipeline.py -i photo.jpg -c
 ```
 
-##  Transfer Methods (9 Total)
-
-| Method | Type | Description | Speed | Best For |
-|--------|------|-------------|-------|----------|
-| **Reinhard** | Statistical | Mean/std matching in lαβ | ⚡ Fast | General use, real-time |
-| **Chroma Only** | Statistical | Color without brightness | ⚡ Fast | Preserve lighting |
-| **Multiscale** | Pyramid | Gaussian pyramid (3 levels) | 🟡 Medium | High detail scenes |
-| **Bilateral** | Edge-Aware | Edge-preserving smoothing | 🟡 Medium | Sharp boundaries |
-| **Detail-Preserve** | Layer Sep. | Base/detail separation | 🟡 Medium | Textures, best quality |
-| **Progressive** | Iterative | 3-iteration refinement | 🟡 Medium | Smooth convergence |
-| **MKL** | Geometric | Monge-Kantorovitch (covariance) | 🟡 Medium (3x) | Warm palettes, correlated colors |
-| **IDT** | Optimal Transport | Sliced Wasserstein distance | 🔴 Slow (20x) | Stylized films, complex distributions |
-| **Histogram** | CDF Matching | Exact histogram specification | ⚡ Fast | Precise channel matching |
-
+##  Transfer Methods (12 Total)
+*
+            'reinhard': 'Reinhard - Fast & Natural (Recommended)',
+            'chroma_only': 'Chroma Only - Preserve Brightness',
+            'multiscale': 'Multi-Scale - Enhanced Details',
+            'bilateral': 'Bilateral - Edge Preserving',
+            'detail_preserve': 'Detail Preserve - Best Quality',
+            'progressive': 'Progressive - Iterative Refinement',
+            'mkl': 'Monge-Kantorovitch - Geometric (Advanced)',
+            'idt': 'Iterative Distribution - Optimal Transport (Advanced)',
+            'histogram_spec': 'Histogram Matching - Exact Contrast Copy',
+            'palette_hard': 'Palette Hard - Quantized/Posterized',
+            'palette_soft': 'Palette Soft - Tinted Blend',
+            'palette_weighted': 'Palette Weighted - Smooth Quantization'
+*
 ### Advanced Geometric Methods
 
 **Monge-Kantorovitch Linear (MKL)**:
@@ -126,19 +127,6 @@ This produces:
 - Proper statistical transfer
 - Correct color convergence
 
-### Verification
-
-**Old Statistics (OpenCV LAB - Wrong):**
-```
-Mean: L=69.2, a=126.8, b=124.6
-```
-
-**New Statistics (Ruderman lαβ - Correct):**
-```
-Mean: l=-1.2943, α=-0.0462, β=-0.0140
-```
-
-At transfer strength=1.0, target statistics converge to within 2% ✓
 
 ##  Detailed Usage
 
@@ -207,9 +195,10 @@ Optional:
                        Choices: Avatar, Barbie, Oppenheimer, WesAnderson, ChristopherNolan,
                                 DavidFincher, QuentinTarentino, BongJoonHo, MartinScorcesse
   --method, -m         Transfer method (default: reinhard)
-                       Choices: reinhard, chroma_only, multiscale, bilateral,
-                                detail_preserve, progressive, histogram,
-                                mkl, monge_kantorovitch, idt, iterative_distribution
+                       Choices: 'reinhard', 'multiscale', 'bilateral', 'detail_preserve', 
+                               'chroma_only', 'progressive', 'mkl', 'monge_kantorovitch',
+                               'idt', 'iterative_distribution', 'histogram_spec',
+                               'palette_hard', 'palette_soft', 'palette_weighted'
   --strength, -s       Transfer strength 0.0-1.0 (default: 1.0)
   --temporal, -t       Apply temporal smoothing (recommended for videos)
   --iterations         IDT iterations (default: 20, video: 10)
@@ -235,116 +224,6 @@ Each director profile includes:
 - Pre-computed color statistics (mean, std, covariance)
 - Dominant color palette (K-means clustering)
 
-##  Project Structure
-
-```
-DIP Project/
-├── Core Processing
-│   ├── final_pipeline.py              # Main CLI pipeline
-│   ├── enhanced_color_transfer.py     # All 9 methods
-│   ├── geometric_color_transfer.py    # MKL + IDT standalone 
-│   ├── color_transfer.py              # Core Reinhard lαβ
-│   ├── color_statistics.py            # Statistics analyzer
-│   ├── shot_frames.py                 # FFmpeg frame extraction
-│   ├── palette_extractor.py           # K-means color extraction
-│   └── palette_matching.py            # KNN matching
-│
-├── Web Application
-│   └── app.py                         # Streamlit interface 
-│
-├── Utilities
-│   ├── compute_covariance_stats.py    # Generate covariance matrices
-│   ├── generate_all_palettes.py       # Batch palette generation
-│   ├── check_ffmpeg.py                # Audio check utility
-│   └── check_status.py                # System status
-│
-├── Documentation =
-│   ├── README.md                      # This file
-│   
-│
-├── Data
-│   ├── Frames/                        # Extracted director frames
-│   │   ├── Avatar/
-│   │   ├── WesAnderson/
-│   │   ├── ChristopherNolan/
-│   │   └── ... (8 directors)
-│   │
-│   └── Palettes/                      # Pre-computed statistics
-│       ├── Avatar_stats.json          # Mean, std, covariance
-│       ├── Avatar_palette.npy         # Color samples
-│       └── ... (8 directors)
-│
-└── Outputs
-    └── Comparisons/                   # Comparison grids
-```
-
-##  Technical Details
-
-### Color Space Transformation
-
-**Forward Transform (BGR → lαβ):**
-1. BGR → RGB (channel swap)
-2. RGB → LMS (linear transformation)
-3. LMS → log(LMS) (logarithmic)
-4. log(LMS) → lαβ (decorrelation matrix)
-
-**Inverse Transform (lαβ → BGR):**
-1. lαβ → log(LMS) (inverse decorrelation)
-2. log(LMS) → LMS (exponential)
-3. LMS → RGB (inverse linear transformation)
-4. RGB → BGR (channel swap)
-
-### Statistical Transfer Algorithm
-
-For each channel in lαβ:
-1. Compute source mean μₛ and std σₛ
-2. Compute target mean μₜ and std σₜ
-3. Transfer: `(pixel - μₛ) × (σₜ / σₛ) + μₜ`
-4. Apply strength: `μₛ + strength × (transferred - μₛ)`
-
-### Enhanced Methods
-
-**Multi-Scale Transfer:**
-- Process at scales: 1.0, 0.5, 0.25
-- Transfer at each scale
-- Combine with weights: [0.5, 0.3, 0.2]
-
-**Detail Preserve:**
-- Separate base (bilateral filtered) and detail layers
-- Transfer only base layer
-- Recombine with original details
-
-**Progressive Transfer:**
-- Iterative transfer with strength schedule: [0.3, 0.6, 1.0]
-- Smoother convergence
-
-## 📈 Performance & Results
-
-### Processing Speed
-
-**Image Processing** (1920×1080 photo):
-
-| Method | Time | Speed vs Reinhard |
-|--------|------|-------------------|
-| Reinhard | 0.3s | 1× (baseline) |
-| Chroma Only | 0.35s | 1.2× |
-| Multiscale | 0.8s | 2.7× |
-| Bilateral | 1.2s | 4× |
-| Detail-Preserve | 1.5s | 5× |
-| Progressive | 0.9s | 3× |
-| **MKL** | **1.0s** | **3×** |
-| **IDT** | **6.0s** | **20×** |
-| Histogram | 0.5s | 1.7× |
-
-**Video Processing** (4-minute, 24fps = 5760 frames):
-
-| Method | Time | Notes |
-|--------|------|-------|
-| Reinhard + smoothing | 8 min | Standard, fast |
-| Detail-Preserve | 20 min | Best quality |
-| MKL | 15 min | Geometric, warm palettes |
-| **IDT (with anti-flicker)** | **25-30 min** | **Smooth, stable** |
-| IDT (without strategy) | 60+ min | ❌ Severe flickering |
 
 **Frame Extraction Optimization**:
 - Old (sequential OpenCV): 7.5 min for 1000 frames
@@ -402,29 +281,7 @@ Test image processed at different strengths (Ruderman lαβ space):
    *SIAM Journal on Imaging Sciences*  
    (Sliced Optimal Transport for IDT)
 
-### Citation
 
-If you use this project in your research:
-
-```bibtex
-@software{director_color_transfer,
-  author = {Your Name},
-  title = {Director Color Style Transfer: From Reinhard to Optimal Transport},
-  year = {2024},
-  url = {https://github.com/yourusername/director-color-transfer}
-}
-```
-
-##  Advanced Features
-
-### Generate Covariance Statistics (for MKL)
-
-```bash
-# Compute full covariance matrices for all directors
-python compute_covariance_stats.py
-```
-
-This updates `Palettes/*_stats.json` with 3×3 covariance matrices, enabling MKL method to capture correlated color channels.
 
 ### Add New Director Styles
 
@@ -448,34 +305,6 @@ for video in videos/*.mp4; do
 done
 ```
 
-##  Troubleshooting
-
-### Common Issues
-
-**No visible color change:**
-- ✅ Ensure using Ruderman lαβ (not OpenCV LAB)
-- ✅ Check strength parameter (default: 1.0)
-- ✅ Verify director stats exist in `Palettes/`
-
-**Video flickering:**
-- ✅ Use `-t` flag for temporal smoothing
-- ✅ For IDT: Anti-flicker automatically enabled
-- ✅ Reduce strength to 0.6-0.8 for smoother results
-
-**Audio missing from output:**
-- ✅ Install FFmpeg: `python check_ffmpeg.py`
-- ✅ Windows: `choco install ffmpeg`
-- ✅ See `AUDIO_GUIDE.md` for detailed setup
-
-**IDT too slow:**
-- ✅ Reduce iterations: `--iterations 10`
-- ✅ Use for short clips (<5 min) or images
-- ✅ Consider MKL for faster geometric method
-
-**Out of memory:**
-- ✅ Pipeline auto-scales to 720p for 4K videos
-- ✅ Reduce FPS with smart detection
-- ✅ Process shorter segments separately
 
 ### Validation
 
@@ -494,41 +323,7 @@ python check_status.py
 # Shows: FFmpeg, dependencies, palette statistics
 ```
 
-##  What Makes This Project Special
 
-### 1. Correct Color Science
-- ✅ Authentic Ruderman lαβ space (not CIE LAB)
-- ✅ Proper decorrelation matrix from Ruderman et al. (1998)
-- ✅ Statistics converge within 2% of target
-
-### 2. Advanced Geometric Methods
-- ✅ Monge-Kantorovitch covariance matching
-- ✅ Sliced Optimal Transport (IDT)
-- ✅ Production-ready anti-flicker for video
-
-### 3. Performance Optimization
-- ✅ FFmpeg parallel extraction (30× speedup)
-- ✅ Smart FPS/resolution scaling
-- ✅ Vectorized NumPy operations
-- ✅ Temporal smoothing with LAB blending
-
-### 4. Production Ready
-- ✅ CLI + Web interface
-- ✅ Audio preservation
-- ✅ 8 director styles
-- ✅ Comprehensive documentation (2000+ lines)
-- ✅ Windows/Mac/Linux compatible
-
-##  Documentation
-
-- **[README.md](README.md)** - This file (complete overview)
-- **[PROJECT_GUIDE.md](PROJECT_GUIDE.md)** - User manual with examples
-- **[QUICK_START.md](QUICK_START.md)** - 5-minute tutorial
-- **[GEOMETRIC_METHODS.md](GEOMETRIC_METHODS.md)** - MKL & IDT deep dive (520 lines)
-- **[USAGE_GUIDE.md](USAGE_GUIDE.md)** - Detailed CLI reference
-- **[DIRECTOR_SETUP.md](DIRECTOR_SETUP.md)** - Add custom directors
-- **[AUDIO_GUIDE.md](AUDIO_GUIDE.md)** - FFmpeg troubleshooting
-- **[README_WEBAPP.md](README_WEBAPP.md)** - Streamlit app guide
 
 ## Contributing
 
