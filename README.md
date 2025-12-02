@@ -56,7 +56,7 @@ python final_pipeline.py -i photo.jpg -c
 ```
 
 ##  Transfer Methods (12 Total)
-*
+
             'reinhard': 'Reinhard - Fast & Natural (Recommended)',
             'chroma_only': 'Chroma Only - Preserve Brightness',
             'multiscale': 'Multi-Scale - Enhanced Details',
@@ -69,7 +69,7 @@ python final_pipeline.py -i photo.jpg -c
             'palette_hard': 'Palette Hard - Quantized/Posterized',
             'palette_soft': 'Palette Soft - Tinted Blend',
             'palette_weighted': 'Palette Weighted - Smooth Quantization'
-*
+
 ### Advanced Geometric Methods
 
 **Monge-Kantorovitch Linear (MKL)**:
