@@ -225,25 +225,6 @@ Each director profile includes:
 - Dominant color palette (K-means clustering)
 
 
-**Frame Extraction Optimization**:
-- Old (sequential OpenCV): 7.5 min for 1000 frames
-- New (FFmpeg parallel): **15 seconds** (30× speedup)
-- Smart FPS reduction: 60fps → 20fps auto-detection
-- Resolution scaling: 4K → 720p for faster processing
-
-### Statistics Convergence
-
-Test image processed at different strengths (Ruderman lαβ space):
-
-| Strength | l (target: -1.29) | α (target: -0.046) | β (target: -0.014) |
-|----------|-------------------|--------------------|--------------------|
-| 0.3 | -1.76 | -0.105 | -0.034 |
-| 0.5 | -1.63 | -0.090 | -0.028 |
-| 0.7 | -1.48 | -0.074 | -0.021 |
-| **1.0** | **-1.32** | **-0.052** | **-0.015** |
-
-✅ At strength=1.0, statistics converge to within **2%** of target
-
 ### Anti-Flicker Strategy Results
 
 **Problem**: IDT uses random projections → different mapping per frame → flickering
