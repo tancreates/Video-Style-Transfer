@@ -8,7 +8,7 @@ Transform your videos and photos with cinematic color grading from famous direct
 
 ##  Highlights
 
--  **5 Color Transfer Methods** - From statistical matching to geometric optimal transport
+-  **5 Major Color Transfer Methods** - From statistical matching to geometric optimal transport
 -  **9 Director Styles** - Avatar, Barbie, Oppenheimer, Wes Anderson, Christopher Nolan, David Fincher, Quentin Tarantino, Bong Joon-ho, Martin Scorsese
 -  **Production Video Processing** - Anti-flicker temporal smoothing, auto FPS/resolution optimization
 -  **Streamlit Web App** - Easy-to-use interface with drag-and-drop
