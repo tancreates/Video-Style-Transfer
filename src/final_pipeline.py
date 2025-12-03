@@ -145,7 +145,7 @@ class DirectorStyleTransfer:
         return target_pixels
      
 
-    def process_frame(self, frame, method='reinhard', preserve_white=True, **kwargs):
+    def process_frame(self, frame, method='reinhard', preserve_white=True,preserve_skin=False, **kwargs):
         """
         Process a single frame
         
@@ -234,11 +234,36 @@ class DirectorStyleTransfer:
         else:
             raise ValueError(f"Unknown method: {method}")
             
-        # 2. Apply White Preservation (Technique 2) if requested
-        # [cite_start]This reduces color tint in high-luminance areas [cite: 304]
+        # --- WHITE PRESERVATION ---
         if preserve_white and processed is not None:
             processed = self.color_transfer.protect_highlights_lab(processed, threshold=220)
+
+        #SKIN PRESERVATION (AI FIRST, CLASSICAL FALLBACK)
+        if preserve_skin and processed is not None:
+            mask = None
             
+            # AI Method (MediaPipe)
+            if self.segmenter is not None:
+                # _get_dl_skin_mask is defined in THIS class (DirectorStyleTransfer)
+                mask = self._get_dl_skin_mask(frame)
+            
+            # Fallback to Classical Method (YCbCr)
+            if mask is None:
+                # create_skin_mask_ycbcr is in the color_transfer object
+                mask = self.color_transfer.create_skin_mask_ycbcr(frame)
+            
+            # Apply Blending
+            if mask is not None:
+                # Convert images to float for blending
+                original_float = frame.astype(np.float32)
+                styled_float = processed.astype(np.float32)
+                
+                # Formula: Result = (Original * Mask) + (Styled * (1 - Mask))
+                # Where Mask is 1.0 for skin, 0.0 for background
+                result_float = (original_float * mask) + (styled_float * (1.0 - mask))
+                
+                processed = np.clip(result_float, 0, 255).astype(np.uint8)
+
         return processed
 
  
@@ -451,13 +476,10 @@ class DirectorStyleTransfer:
                     # Standard processing for other methods
                     processed = self.process_frame(frame_small, method=method, **kwargs)
 
-                # --- ADDED: White Preservation for IDT Video Mode ---
-                # Standard methods handle this in process_frame, but IDT loop above does not.
+
                 if use_fixed_idt_mapping and kwargs.get('preserve_white', True):
                      processed = self.color_transfer.protect_highlights_lab(processed, threshold=220)
-                # ----------------------------------------------------
 
-                # Upscale if needed
                 if downscale:
                     processed = cv2.resize(processed, (width, height), interpolation=cv2.INTER_LANCZOS4)
                 
